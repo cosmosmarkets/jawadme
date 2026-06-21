@@ -1,40 +1,65 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  color-scheme: dark;
+* {
+  box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
+html,
 body {
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 0;
 }
 
-/* Slow ambient drift for the background glow blobs */
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
+::selection {
+  background: var(--accent-sel, #d4ddf6);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---- Responsive: stack the panel on narrow viewports ---- */
+@media (max-width: 1020px) {
+  .jj-wrap {
+    flex-direction: column !important;
+    gap: 40px !important;
+    padding: 44px !important;
   }
-  50% {
-    transform: translate3d(0, -24px, 0) scale(1.08);
+  .jj-left,
+  .jj-mid {
+    width: 100% !important;
+    flex: none !important;
+  }
+  .jj-mid {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px solid var(--rule);
+    padding-top: 32px !important;
   }
 }
 
-.animate-drift {
-  animation: drift 14s ease-in-out infinite;
+/* ---- Kinetic name: each letter lifts + tints on hover ---- */
+.jj-letter:hover {
+  transform: translateY(-7px) !important;
+  color: var(--accent) !important;
+}
+
+/* ---- Text links: widen gap + tint label on hover ---- */
+.jj-link:hover {
+  gap: 15px;
+}
+.jj-link:hover .jj-link-label {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---- Social icons: float + brighten on hover ---- */
+.jj-soc:hover {
+  opacity: 1 !important;
+  transform: translateY(-3px) scale(1.12) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-drift {
-    animation: none;
-  }
-  html {
-    scroll-behavior: auto;
+  * {
+    transition: none !important;
   }
 }
