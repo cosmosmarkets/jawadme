@@ -37,11 +37,10 @@ a {
   }
 }
 
-/* ---- Kinetic name: each letter lifts + tints on hover ---- */
-.jj-letter:hover {
-  transform: translateY(-7px) !important;
-  color: var(--accent) !important;
-}
+/* Kinetic name lift, social float + tap feedback are handled by Framer Motion
+   (whileHover/whileTap) in page.tsx so they don't fight motion's inline
+   transforms. The link gap/label tint stays in CSS since it animates flex-gap
+   and a child, which CSS does more cheaply. */
 
 /* ---- Text links: widen gap + tint label on hover ---- */
 .jj-link:hover {
@@ -50,12 +49,6 @@ a {
 .jj-link:hover .jj-link-label {
   color: var(--accent);
   border-color: var(--accent);
-}
-
-/* ---- Social icons: float + brighten on hover ---- */
-.jj-soc:hover {
-  opacity: 1 !important;
-  transform: translateY(-3px) scale(1.12) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

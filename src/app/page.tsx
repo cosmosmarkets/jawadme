@@ -5,13 +5,13 @@
 // interactive experience list on the right. Recreated 1:1 from the
 // original HTML/CSS prototype.
 
+import { useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-} from "react";
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  type Variants,
+} from "motion/react";
 
 const ACCENT = "#3257cc";
 
@@ -92,7 +92,7 @@ const JOBS: Job[] = [
     org: "Cosmos Models",
     role: "Self-employed 3D Artist",
     url: "https://cosmosmodels.lovable.app",
-    icon: ddg("cosmosmodels.lovable.app"),
+    icon: "https://www.google.com/s2/favicons?domain=cosmosmodels.lovable.app&sz=64",
     detail:
       "My own commissions studio in ZBrush, Blender and Substance. 200+ member server and paid clients.",
   },
@@ -108,6 +108,50 @@ const JOBS: Job[] = [
 ];
 
 const NAME_PARTS = ["Jawad", "Jalal"];
+
+// ---- Entrance orchestration (Framer Motion) ----
+// Variant labels ("hidden"/"show") cascade from the panel down through the two
+// columns to individual items, producing one coherent staggered reveal.
+// MotionConfig reducedMotion="user" strips transforms for reduced-motion users.
+const PANEL_V: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.985 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.2, 0.8, 0.2, 1],
+      delayChildren: 0.12,
+      staggerChildren: 0.08,
+    },
+  },
+};
+const COL_V: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+const ITEM_V: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 260, damping: 28 },
+  },
+};
+const NAME_V: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.035, delayChildren: 0.05 } },
+};
+const LETTER_V: Variants = {
+  hidden: { opacity: 0, y: 18, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { type: "spring", stiffness: 320, damping: 24 },
+  },
+};
 
 const SOCIALS: {
   label: string;
@@ -154,21 +198,11 @@ const SOCIALS: {
 ];
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const portraitRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const reveal = () => setMounted(true);
-    const raf = requestAnimationFrame(() => requestAnimationFrame(reveal));
-    const timer = setTimeout(reveal, 120);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  const rev = mounted ? 1 : 0;
-  const revUp = mounted ? "translateY(0)" : "translateY(12px)";
+  // Which experience row is open (hover on desktop, tap on touch).
+  const [active, setActive] = useState<number | null>(null);
+  // Favicons that failed to load — rendered as an initial-letter fallback.
+  const [failedIcons, setFailedIcons] = useState<Set<number>>(new Set());
 
   const portraitMove = (e: MouseEvent<HTMLDivElement>) => {
     const el = portraitRef.current;
@@ -183,43 +217,21 @@ export default function Home() {
     if (el) el.style.transform = "rotateY(0deg) rotateX(0deg) scale(1)";
   };
 
-  const jobEnter = (e: MouseEvent<HTMLAnchorElement>) => {
-    const row = e.currentTarget;
-    row.style.backgroundColor = "rgba(255,255,255,0.6)";
-    row.style.boxShadow =
-      "inset 0 1px 0 rgba(255,255,255,0.85), 0 12px 28px -14px rgba(20,22,30,0.34)";
-    const a = row.querySelector<HTMLElement>(".jj-arrow");
-    if (a) {
-      a.style.opacity = "1";
-      a.style.transform = "translateX(0)";
-    }
-    const t = row.querySelector<HTMLElement>(".jj-tile");
-    if (t) t.style.transform = "scale(1.1) rotate(-3deg)";
-    const d = row.querySelector<HTMLElement>(".jj-detail");
-    if (d) {
-      d.style.maxHeight = d.scrollHeight + "px";
-      d.style.opacity = "1";
-      d.style.marginTop = "8px";
-    }
-  };
-  const jobLeave = (e: MouseEvent<HTMLAnchorElement>) => {
-    const row = e.currentTarget;
-    row.style.backgroundColor = "transparent";
-    row.style.boxShadow = "none";
-    const a = row.querySelector<HTMLElement>(".jj-arrow");
-    if (a) {
-      a.style.opacity = "0";
-      a.style.transform = "translateX(-5px)";
-    }
-    const t = row.querySelector<HTMLElement>(".jj-tile");
-    if (t) t.style.transform = "scale(1) rotate(0deg)";
-    const d = row.querySelector<HTMLElement>(".jj-detail");
-    if (d) {
-      d.style.maxHeight = "0";
-      d.style.opacity = "0";
-      d.style.marginTop = "0";
-    }
-  };
+  // First tap opens a row; tapping an already-open row follows its link.
+  // On desktop the row is already open via hover, so the click navigates.
+  const onRowClick =
+    (i: number) => (e: MouseEvent<HTMLAnchorElement>) => {
+      if (active !== i) {
+        e.preventDefault();
+        setActive(i);
+      }
+    };
+  const markFailed = (i: number) =>
+    setFailedIcons((prev) => {
+      const next = new Set(prev);
+      next.add(i);
+      return next;
+    });
 
   const rootStyle: CSSProperties = {
     ["--accent" as string]: ACCENT,
@@ -240,6 +252,7 @@ export default function Home() {
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="jj-root" style={rootStyle}>
       {/* subtle material grain */}
       <div
@@ -257,8 +270,11 @@ export default function Home() {
       />
 
       {/* ============ LIQUID GLASS PANEL ============ */}
-      <div
+      <motion.div
         className="jj-wrap"
+        initial="hidden"
+        animate="show"
+        variants={PANEL_V}
         style={{
           position: "relative",
           zIndex: 1,
@@ -304,8 +320,9 @@ export default function Home() {
         />
 
         {/* ================= LEFT — IDENTITY ================= */}
-        <div
+        <motion.div
           className="jj-left"
+          variants={COL_V}
           style={{
             width: 372,
             flex: "none",
@@ -316,13 +333,11 @@ export default function Home() {
           }}
         >
           {/* circular portrait, tilts on hover */}
-          <div
+          <motion.div
+            variants={ITEM_V}
             onMouseMove={portraitMove}
             onMouseLeave={portraitLeave}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .8s ease, transform .8s ease",
               width: 154,
               height: 154,
               marginBottom: 30,
@@ -355,10 +370,11 @@ export default function Home() {
                 }}
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* kinetic, impactful name */}
-          <h1
+          <motion.h1
+            variants={NAME_V}
             style={{
               fontFamily: "'Newsreader', Georgia, serif",
               fontWeight: 600,
@@ -375,36 +391,28 @@ export default function Home() {
           >
             {NAME_PARTS.map((part, pi) => (
               <span key={pi} style={{ display: "inline-flex" }}>
-                {part.split("").map((ch, ci) => {
-                  const idx = pi * 5 + ci;
-                  return (
-                    <span
-                      key={ci}
-                      className="jj-letter"
-                      style={{
-                        display: "inline-block",
-                        cursor: "default",
-                        opacity: rev,
-                        transform: revUp,
-                        transition:
-                          "opacity .6s ease, transform .35s cubic-bezier(.2,.8,.2,1), color .25s ease",
-                        transitionDelay: `${40 + idx * 35}ms`,
-                      }}
-                    >
-                      {ch}
-                    </span>
-                  );
-                })}
+                {part.split("").map((ch, ci) => (
+                  <motion.span
+                    key={ci}
+                    className="jj-letter"
+                    variants={LETTER_V}
+                    whileHover={{ y: -7, color: ACCENT }}
+                    style={{
+                      display: "inline-block",
+                      cursor: "default",
+                    }}
+                  >
+                    {ch}
+                  </motion.span>
+                ))}
               </span>
             ))}
-          </h1>
+          </motion.h1>
 
           {/* sub headline — Chillax, no italics */}
-          <div
+          <motion.div
+            variants={ITEM_V}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .7s ease .34s, transform .7s ease .34s",
               fontFamily: "'Chillax', 'Inter', sans-serif",
               fontSize: 18,
               lineHeight: 1.32,
@@ -417,14 +425,12 @@ export default function Home() {
             <span style={{ fontWeight: 500, color: "var(--accent)" }}>
               Building the good&#8209;looking.
             </span>
-          </div>
+          </motion.div>
 
           {/* 2-line bio, no em dashes */}
-          <p
+          <motion.p
+            variants={ITEM_V}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .7s ease .4s, transform .7s ease .4s",
               fontSize: 14,
               lineHeight: 1.6,
               color: "#6a6961",
@@ -436,14 +442,12 @@ export default function Home() {
             Fifteen, just outside London, operating at industry level since
             thirteen. 3D artist, marketer, and founder making things that look
             good and actually work.
-          </p>
+          </motion.p>
 
           {/* text links with icons */}
-          <div
+          <motion.div
+            variants={ITEM_V}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .7s ease .48s, transform .7s ease .48s",
               display: "flex",
               flexDirection: "column",
               gap: 13,
@@ -483,9 +487,11 @@ export default function Home() {
                 </>
               }
             />
-            <a
+            <motion.a
               href="mailto:hijawadjalal@gmail.com"
               className="jj-link"
+              whileHover={{ x: 3 }}
+              whileTap={{ scale: 0.96 }}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -520,15 +526,13 @@ export default function Home() {
               >
                 Email me
               </span>
-            </a>
-          </div>
+            </motion.a>
+          </motion.div>
 
           {/* socials in glass pill */}
-          <div
+          <motion.div
+            variants={ITEM_V}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .7s ease .56s, transform .7s ease .56s",
               marginTop: 30,
               display: "inline-flex",
               alignSelf: "flex-start",
@@ -545,17 +549,18 @@ export default function Home() {
             }}
           >
             {SOCIALS.map((s) => (
-              <a
+              <motion.a
                 key={s.label}
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
                 className="jj-soc"
+                whileHover={{ y: -3, scale: 1.12, opacity: 1 }}
+                whileTap={{ scale: 0.92 }}
                 style={{
                   color: s.color,
                   opacity: 0.8,
-                  transition: "opacity .2s ease, transform .2s ease",
                   display: "block",
                 }}
               >
@@ -567,14 +572,15 @@ export default function Home() {
                 >
                   <path d={s.path} />
                 </svg>
-              </a>
+              </motion.a>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* ================= RIGHT — EXPERIENCE ================= */}
-        <div
+        <motion.div
           className="jj-mid"
+          variants={COL_V}
           style={{
             flex: 1,
             minWidth: 0,
@@ -587,11 +593,9 @@ export default function Home() {
             zIndex: 1,
           }}
         >
-          <div
+          <motion.div
+            variants={ITEM_V}
             style={{
-              opacity: rev,
-              transform: revUp,
-              transition: "opacity .7s ease .2s, transform .7s ease .2s",
               display: "flex",
               alignItems: "baseline",
               justifyContent: "space-between",
@@ -618,23 +622,34 @@ export default function Home() {
             >
               {JOBS.length} roles
             </span>
-          </div>
+          </motion.div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {JOBS.map((job, i) => (
-              <a
+          <motion.div
+            variants={COL_V}
+            style={{ display: "flex", flexDirection: "column" }}
+          >
+            {JOBS.map((job, i) => {
+              const open = active === i;
+              return (
+              <motion.a
                 key={job.org}
                 href={job.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                onMouseEnter={jobEnter}
-                onMouseLeave={jobLeave}
+                variants={ITEM_V}
+                onMouseEnter={() => setActive(i)}
+                onMouseLeave={() => setActive(null)}
+                onClick={onRowClick(i)}
+                whileTap={{ scale: 0.99 }}
                 style={{
-                  opacity: rev,
-                  transform: revUp,
+                  backgroundColor: open
+                    ? "rgba(255,255,255,0.6)"
+                    : "transparent",
+                  boxShadow: open
+                    ? "inset 0 1px 0 rgba(255,255,255,0.85), 0 12px 28px -14px rgba(20,22,30,0.34)"
+                    : "none",
                   transition:
-                    "opacity .6s ease, transform .6s ease, background-color .24s ease, box-shadow .24s ease",
-                  transitionDelay: `${(0.26 + i * 0.05).toFixed(2)}s`,
+                    "background-color .24s ease, box-shadow .24s ease",
                   display: "block",
                   padding: "13px 14px",
                   margin: "0 -14px",
@@ -656,8 +671,13 @@ export default function Home() {
                   >
                     {job.year}
                   </span>
-                  <span
+                  <motion.span
                     className="jj-tile"
+                    animate={{
+                      scale: open ? 1.1 : 1,
+                      rotate: open ? -3 : 0,
+                    }}
+                    transition={{ type: "spring", stiffness: 380, damping: 22 }}
                     style={{
                       width: 34,
                       height: 34,
@@ -674,24 +694,40 @@ export default function Home() {
                       justifyContent: "center",
                       overflow: "hidden",
                       padding: 5,
-                      transition: "transform .26s cubic-bezier(.2,.8,.2,1)",
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={job.icon}
-                      alt=""
-                      width={24}
-                      height={24}
-                      style={{
-                        display: "block",
-                        width: 24,
-                        height: 24,
-                        objectFit: "contain",
-                        borderRadius: 5,
-                      }}
-                    />
-                  </span>
+                    {failedIcons.has(i) ? (
+                      <span
+                        style={{
+                          fontFamily: "'Newsreader', Georgia, serif",
+                          fontSize: 16,
+                          fontWeight: 600,
+                          color: "var(--accent)",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {job.org.charAt(0)}
+                      </span>
+                    ) : (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={job.icon}
+                          alt=""
+                          width={24}
+                          height={24}
+                          onError={() => markFailed(i)}
+                          style={{
+                            display: "block",
+                            width: 24,
+                            height: 24,
+                            objectFit: "contain",
+                            borderRadius: 5,
+                          }}
+                        />
+                      </>
+                    )}
+                  </motion.span>
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span
                       style={{
@@ -718,52 +754,64 @@ export default function Home() {
                       {job.role}
                     </span>
                   </span>
-                  <span
+                  <motion.span
                     className="jj-arrow"
+                    animate={{
+                      opacity: open ? 1 : 0,
+                      x: open ? 0 : -5,
+                    }}
+                    transition={{ duration: 0.24, ease: "easeOut" }}
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 14,
                       color: "var(--accent)",
-                      opacity: 0,
-                      transform: "translateX(-5px)",
-                      transition: "opacity .24s ease, transform .24s ease",
                       flex: "none",
                     }}
                   >
                     &#8599;
-                  </span>
+                  </motion.span>
                 </span>
-                <span
-                  className="jj-detail"
-                  style={{
-                    display: "block",
-                    maxHeight: 0,
-                    opacity: 0,
-                    overflow: "hidden",
-                    transition:
-                      "max-height .34s cubic-bezier(.2,.8,.2,1), opacity .3s ease, margin-top .3s ease",
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: 13,
-                      lineHeight: 1.5,
-                      color: "#6a6961",
-                      paddingLeft: 108,
-                      paddingRight: 24,
-                      textWrap: "pretty",
-                    }}
-                  >
-                    {job.detail}
-                  </span>
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.span
+                      key="detail"
+                      initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                      animate={{ height: "auto", opacity: 1, marginTop: 8 }}
+                      exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                      transition={{
+                        height: {
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 34,
+                        },
+                        opacity: { duration: 0.2 },
+                      }}
+                      style={{ display: "block", overflow: "hidden" }}
+                    >
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: 13,
+                          lineHeight: 1.5,
+                          color: "#6a6961",
+                          paddingLeft: 108,
+                          paddingRight: 24,
+                          textWrap: "pretty",
+                        }}
+                      >
+                        {job.detail}
+                      </span>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.a>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
+    </MotionConfig>
   );
 }
 
@@ -779,10 +827,12 @@ function TextLink({
   soon?: boolean;
 }) {
   return (
-    <a
+    <motion.a
       href={href}
       rel="noopener"
       className="jj-link"
+      whileHover={{ x: 3 }}
+      whileTap={{ scale: 0.96 }}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -828,6 +878,6 @@ function TextLink({
           soon
         </span>
       )}
-    </a>
+    </motion.a>
   );
 }

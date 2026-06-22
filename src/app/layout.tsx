@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://jawad-portfolio-kohl.vercel.app"),
   title: "Jawad Jalal — Designer & Founder",
   description:
     "Jawad Jalal. Designer and founder building the good-looking. 3D artist, marketer, and founder making things that look good and actually work.",
@@ -10,6 +11,12 @@ export const metadata: Metadata = {
     description:
       "Designer and founder building the good-looking. 3D artist, marketer, and founder making things that look good and actually work.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jawad Jalal — Designer & Founder",
+    description:
+      "Designer and founder building the good-looking. 3D artist, marketer, and founder making things that look good and actually work.",
   },
 };
 
