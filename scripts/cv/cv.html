@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jawad Jalal — CV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ===========================================================
+         Jawad Jalal — CV
+         On-brand with jawadj.design: Newsreader display serif,
+         Inter body, JetBrains Mono micro-labels, accent #3257cc.
+         Laid out for A4 print -> PDF (via Playwright/Chromium).
+         =========================================================== */
+      :root {
+        --accent: #3257cc;
+        --ink: #16150f;
+        --ink-soft: #6a6961;
+        --ink-faint: #908e85;
+        --label: #a6a399;
+        --rule: rgba(40, 40, 55, 0.12);
+        --paper: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        font-size: 10.4px;
+        line-height: 1.5;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      .sheet {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        background: var(--paper);
+        position: relative;
+      }
+
+      /* ---- Header band ---- */
+      .header {
+        padding: 9mm 16mm 5mm;
+        position: relative;
+        background:
+          radial-gradient(120% 140% at 0% 0%, #eef1f5 0%, #f3f2ed 55%, #ffffff 100%);
+        border-bottom: 1px solid var(--rule);
+      }
+      .header::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--accent);
+      }
+
+      h1 {
+        font-family: "Newsreader", Georgia, serif;
+        font-weight: 600;
+        font-size: 40px;
+        line-height: 0.98;
+        letter-spacing: -0.026em;
+        margin: 0 0 8px;
+        color: #0d0c08;
+      }
+
+      .tagline {
+        font-size: 12.5px;
+        font-weight: 500;
+        margin: 0 0 14px;
+      }
+      .tagline .soft {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .tagline .accent {
+        color: var(--accent);
+        font-weight: 500;
+      }
+
+      .contact {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        color: var(--ink-soft);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px 14px;
+        letter-spacing: 0.01em;
+      }
+      .contact a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+      .contact .dot {
+        color: var(--accent);
+      }
+
+      /* ---- Body grid ---- */
+      .body {
+        display: grid;
+        grid-template-columns: 1fr 64mm;
+        gap: 0;
+      }
+      .main {
+        padding: 5mm 9mm 5mm 16mm;
+      }
+      .side {
+        padding: 5mm 16mm 5mm 9mm;
+        border-left: 1px solid var(--rule);
+        background: #fbfbf9;
+      }
+
+      .section {
+        margin-bottom: 4mm;
+      }
+      .section:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--label);
+        margin: 0 0 8px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .profile {
+        font-size: 10.6px;
+        line-height: 1.62;
+        color: #3b3a33;
+        text-wrap: pretty;
+      }
+
+      /* ---- Experience ---- */
+      .job {
+        margin-bottom: 3.1mm;
+        break-inside: avoid;
+      }
+      .job:last-child {
+        margin-bottom: 0;
+      }
+      .job-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .job-org {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+      .job-org .at {
+        color: var(--ink-faint);
+        font-weight: 500;
+      }
+      .job-year {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8.5px;
+        color: var(--ink-faint);
+        white-space: nowrap;
+        flex: none;
+      }
+      .job-role {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--accent);
+        margin: 1px 0 3px;
+      }
+      .job-detail {
+        font-size: 10px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        text-wrap: pretty;
+      }
+
+      /* ---- Sidebar blocks ---- */
+      .skill-group {
+        margin-bottom: 4mm;
+      }
+      .skill-group:last-child {
+        margin-bottom: 0;
+      }
+      .skill-h {
+        font-size: 9.5px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 2px;
+      }
+      .skill-list {
+        font-size: 9.6px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+      }
+
+      .edu-school {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .edu-meta {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8.5px;
+        color: var(--ink-faint);
+        margin: 1px 0 6px;
+      }
+      .edu-row {
+        font-size: 9.6px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin-bottom: 4px;
+      }
+      .edu-row b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .pill {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        color: var(--accent);
+        background: rgba(50, 87, 204, 0.08);
+        border: 1px solid rgba(50, 87, 204, 0.18);
+        border-radius: 999px;
+        padding: 1px 7px;
+        margin: 0 3px 3px 0;
+      }
+
+      .work-item {
+        font-size: 9.6px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin-bottom: 3px;
+      }
+      .work-item b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .links {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .links a {
+        font-size: 9.5px;
+        color: var(--ink);
+        text-decoration: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .links .k {
+        color: var(--ink-faint);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8.5px;
+      }
+      .links .v {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sheet">
+      <!-- ============ HEADER ============ -->
+      <header class="header">
+        <h1>Jawad Jalal</h1>
+        <p class="tagline">
+          <span class="soft">Designer &amp; Founder.</span>
+          <span class="accent">Building the good&#8209;looking.</span>
+        </p>
+        <div class="contact">
+          <a href="mailto:hijawadjalal@gmail.com">hijawadjalal@gmail.com</a>
+          <span class="dot">/</span>
+          <span>London, UK</span>
+          <span class="dot">/</span>
+          <a href="https://jawadj.design">jawadj.design</a>
+          <span class="dot">/</span>
+          <a href="https://x.com/jawadmakes">x.com/jawadmakes</a>
+          <span class="dot">/</span>
+          <a href="https://www.linkedin.com/in/jawad-jalal-designs">linkedin.com/in/jawad-jalal-designs</a>
+        </div>
+      </header>
+
+      <!-- ============ BODY ============ -->
+      <div class="body">
+        <!-- ---------- MAIN ---------- -->
+        <main class="main">
+          <section class="section">
+            <h2 class="section-label">Profile</h2>
+            <p class="profile">
+              Fifteen and just outside London, operating at industry level since
+              thirteen. A 3D artist, marketer and founder making things that look
+              good and actually work &mdash; from game&#8209;ready Roblox assets to
+              brand identity and full site builds. Founder of jawadj.design and
+              weld., CMO at Acquiblox and PR agent at SOF Agency, backed by a strong
+              academic record (A* HPQ, predicted Grade&nbsp;9s across six subjects).
+              Focused on high&#8209;leverage skills &mdash; management, communication
+              and negotiation &mdash; to unlock game production and strategic
+              partnerships.
+            </p>
+          </section>
+
+          <section class="section">
+            <h2 class="section-label">Experience</h2>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">jawadj.design</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">Founder &middot; Web &amp; Design Studio</div>
+              <p class="job-detail">
+                My freelance studio. Brand identity, UI/UX and full site builds for
+                founders who want it to actually look good.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">weld.</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">Founder &amp; Project Manager</div>
+              <p class="job-detail">
+                A structured marketplace fixing how Roblox studios hire developers.
+                Sole founder, live waitlist at weldroblox.com.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">Acquiblox</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">Chief Marketing Officer</div>
+              <p class="job-detail">
+                Own marketing strategy, brand positioning and community growth
+                across Discord and X.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">Basket Ent</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">Acquisitions Team</div>
+              <p class="job-detail">
+                Sourcing, evaluating and closing game acquisition deals, then
+                planning post&#8209;acquisition LiveOps.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">World Ent</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">3D Artist</div>
+              <p class="job-detail">
+                Stylised and realistic 3D assets for live Roblox titles, modelled
+                and textured end to end.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">SOF Agency</span>
+                <span class="job-year">2026 — Present</span>
+              </div>
+              <div class="job-role">PR Agent &amp; Copywriter</div>
+              <p class="job-detail">
+                PR, influencer partnerships and crowdfunding campaigns for game
+                studios and digital brands.
+              </p>
+            </div>
+
+            <div class="job">
+              <div class="job-head">
+                <span class="job-org">Cosmos Models</span>
+                <span class="job-year">2024 — Present</span>
+              </div>
+              <div class="job-role">Self&#8209;Employed 3D Artist</div>
+              <p class="job-detail">
+                My own commissions studio in ZBrush, Blender and Substance, with a
+                200+ member server and paid clients. Contracted by leading Roblox
+                studios &mdash; Optidash, Underdog, Inter, Ape and Bound &mdash; on
+                titles including Fish it!, Blade Ball (Dobig Studios) and
+                Ghoul;//RE.
+              </p>
+            </div>
+          </section>
+        </main>
+
+        <!-- ---------- SIDEBAR ---------- -->
+        <aside class="side">
+          <section class="section">
+            <h2 class="section-label">Education</h2>
+            <div class="edu-school">Queen Elizabeth's School, Barnet</div>
+            <div class="edu-meta">Year 10 GCSE &middot; Sep 2024 — Jun 2027</div>
+            <div class="edu-row">
+              <b>HPQ:</b> A* (47/50)
+            </div>
+            <div class="edu-row">
+              <b>Predicted GCSEs</b>
+              <div style="margin-top: 3px">
+                <span class="pill">9 · Economics</span>
+                <span class="pill">9 · Maths</span>
+                <span class="pill">9 · History</span>
+                <span class="pill">9 · German</span>
+                <span class="pill">9 · D&amp;T</span>
+                <span class="pill">8 · Eng Lit</span>
+                <span class="pill">8 · Eng Lang</span>
+                <span class="pill">8 · Triple Sci</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-label">Skills</h2>
+            <div class="skill-group">
+              <div class="skill-h">3D &amp; Technical</div>
+              <div class="skill-list">
+                Blender · ZBrush · Substance Painter · Roblox Studio · full
+                pipelines (topology, UV, baking, PBR, LOD) · stylised &amp;
+                photoreal rendering · AI workflow integration
+              </div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-h">Design &amp; Web</div>
+              <div class="skill-list">
+                Brand identity · UI/UX · full site builds · copywriting
+              </div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-h">Production &amp; Business</div>
+              <div class="skill-list">
+                Game acquisitions · LiveOps · brand partnerships · PR &amp; outreach
+                · community growth
+              </div>
+            </div>
+            <div class="skill-group">
+              <div class="skill-h">Leadership</div>
+              <div class="skill-list">
+                Project management · client negotiation · strategic planning · time
+                management
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-label">Selected Work</h2>
+            <div class="work-item">
+              <b>Chaos Eater Sword Series</b> — fantasy weapons, advanced ZBrush
+              sculpting &amp; PBR
+            </div>
+            <div class="work-item">
+              <b>Ornate Treasure Chest</b> — stylised game-ready prop, environment
+              storytelling
+            </div>
+            <div class="work-item">
+              <b>Creaking Remake</b> — realistic horror character, cinematic
+              lighting
+            </div>
+          </section>
+
+          <section class="section">
+            <h2 class="section-label">Online</h2>
+            <div class="links">
+              <a href="https://jawadj.design"><span class="k">Portfolio</span><span class="v">jawadj.design</span></a>
+              <a href="https://weldroblox.com"><span class="k">weld.</span><span class="v">weldroblox.com</span></a>
+              <a href="https://x.com/jawadmakes"><span class="k">X</span><span class="v">@jawadmakes</span></a>
+              <a href="https://www.instagram.com/j.awadjalal/"><span class="k">Instagram</span><span class="v">@j.awadjalal</span></a>
+              <a href="https://www.tiktok.com/@jawadmakes"><span class="k">TikTok</span><span class="v">@jawadmakes</span></a>
+              <a href="https://www.youtube.com/@jawadmake"><span class="k">YouTube</span><span class="v">@jawadmake</span></a>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

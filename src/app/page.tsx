@@ -477,8 +477,9 @@ export default function Home() {
               }
             />
             <TextLink
-              href="#"
+              href="/jawad-jalal-cv.pdf"
               label="Download CV"
+              download="Jawad-Jalal-CV.pdf"
               icon={
                 <>
                   <path d="M12 3v12" />
@@ -820,15 +821,19 @@ function TextLink({
   icon,
   label,
   soon,
+  download,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   soon?: boolean;
+  download?: string;
 }) {
   return (
     <motion.a
       href={href}
+      download={download}
+      target={download ? "_blank" : undefined}
       rel="noopener"
       className="jj-link"
       whileHover={{ x: 3 }}
